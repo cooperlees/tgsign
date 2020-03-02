@@ -36,7 +36,7 @@ setup(
         "Programming Language :: Python :: 3.8",
     ],
     python_requires=">=3.7",
-    install_requires=None,
+    install_requires=["httpx"],
     entry_points={"console_scripts": ["tgsign = tgsign:main"]},
     test_suite=ptr_params["test_suite"],
 )
