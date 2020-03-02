@@ -24,5 +24,7 @@ jobs:
         python -m pip install --upgrade pip setuptools ptr
 
     - name: Run ptr
+      env:
+       pythonioencoding: utf-8
       run: |
         python -m ptr --print-cov
