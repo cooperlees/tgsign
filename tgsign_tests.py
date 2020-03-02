@@ -6,6 +6,7 @@
 
 import unittest
 from configparser import ConfigParser
+from json import loads
 from os import environ, getpid
 from pathlib import Path
 from tempfile import gettempdir
@@ -20,7 +21,7 @@ import tgsign
 UNITTEST_TGSIGN_CONF = """\
 [tgsign]
 api_id = unittest
-api_secret = unittest_secret
+api_token = unittest_token
 public_key_file = ~/.ssh/unittest_id_ed2519.pub
 username = unittest_username
 
@@ -28,11 +29,11 @@ username = unittest_username
 
 
 class FakeHttpx:
-    ERROR_JSON = [{"code": 69, "error": "It went real real bad"}]
-    GOOD_JSON = [{"public_cert": "SSH cert of auth win"}]
+    ERROR_JSON = {"code": 69, "error": "It went real real bad"}
+    GOOD_JSON = {"public_cert": "SSH cert of auth win"}
 
-    def __init__(self, url: str, data: Dict) -> None:
-        self.data = data
+    def __init__(self, url: str, data: str) -> None:
+        self.data = loads(data)
         self.url = url
 
     def json(self, *args, **kwargs) -> List[Dict]:
@@ -60,15 +61,15 @@ class TgSignTests(unittest.TestCase):
         self.assertTrue("public_key_file" in cp["tgsign"])
 
     def test_get_signed_cert(self) -> None:
-        with patch("tgsign.httpx.post", FakeHttpx):
+        with patch("tgsign.httpx.Client.post", FakeHttpx):
             self.assertEqual(
                 "SSH cert of auth win",
-                tgsign.get_signed_cert("api_id", "api_secret", "PublicKey", "username"),
+                tgsign.get_signed_cert("api_id", "api_token", "PublicKey", "username"),
             )
 
         with patch("tgsign.httpx.post", FakeHttpx):
             self.assertEqual(
-                "", tgsign.get_signed_cert("api_id", "api_secret", "PublicKey", "fail"),
+                "", tgsign.get_signed_cert("api_id", "api_token", "PublicKey", "fail"),
             )
 
     def test_handle_debug(self) -> None:
@@ -77,7 +78,7 @@ class TgSignTests(unittest.TestCase):
     def test_init_config(self) -> None:
         user_input = (
             "unittest",
-            "unittest_secret",
+            "unittest_token",
             "~/.ssh/unittest_id_ed2519.pub",
             "unittest_username",
         )

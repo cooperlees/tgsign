@@ -27,7 +27,7 @@ Now enjoy access to a Terragraph Development image.
 ```ini
 [tgsign]
 api_id = foo
-api_secret = bar
+api_token = bar
 public_key_file = /home/cooper/.ssh/id_25519.pub
 username = cooper
 ```
