@@ -16,6 +16,7 @@ import httpx
 
 CONF_FILE_NAME = ".tgsign.conf"
 LOG = logging.getLogger(__name__)
+WINDOWS = sys.platform == "win32"
 
 
 def _config_read(config_path: Path) -> Optional[ConfigParser]:

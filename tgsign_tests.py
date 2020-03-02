@@ -132,8 +132,8 @@ class TgSignTests(unittest.TestCase):
             self.assertEqual(0, tgsign.write_public_cert(cp, fake_public_key))
 
             self.assertTrue(expected_public_cert.exists())
-            # TODO: Test this on Windows ...
-            self.assertEqual(33152, expected_public_cert.stat().st_mode)
+            expected_st_mode = 33206 if tgsign.WINDOWS else 33152
+            self.assertEqual(expected_st_mode, expected_public_cert.stat().st_mode)
 
             with expected_public_cert.open("r") as epcfp:
                 loaded_key = epcfp.read()
