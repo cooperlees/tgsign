@@ -1,5 +1,8 @@
 # tgsign
 
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Actions Status](https://github.com/cooperlees/tgsign/workflows/tgsign_ci/badge.svg)](https://github.com/cooperlees/tgsign/actions)
+
 Sign SSH Keys for Terragraph Access
 
 ## What is `tgsign`

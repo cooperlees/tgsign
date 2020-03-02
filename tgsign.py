@@ -69,7 +69,7 @@ def get_signed_cert(
     resp_json = r.json()
     if "error" in resp_json[0]:
         LOG.error(
-            f"Problem siging key for {api_id} / ({username}): {resp_json[0]['error']}"
+            f"Problem signing key for {api_id} / ({username}): {resp_json[0]['error']}"
         )
         return ""
 
@@ -99,7 +99,7 @@ def init_config(config_path: Path) -> int:
 
 
 def write_public_cert(config: ConfigParser, public_key: str) -> int:
-    public_key_path = Path(config["tgsign"]["public_key_file"])
+    public_key_path = Path(config["tgsign"]["public_key_file"]).expanduser()
     public_cert_file_name = public_key_path.name.replace(".pub", "-cert.pub")
     public_cert_path = public_key_path.parent / public_cert_file_name
     temp_public_cert_path = public_key_path.parent / f".{public_cert_file_name}"
@@ -114,7 +114,9 @@ def write_public_cert(config: ConfigParser, public_key: str) -> int:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument(
         "-d", "--debug", action="store_true", help="Verbose debug output"
     )
@@ -133,7 +135,8 @@ def main() -> int:
     LOG.debug(f"Starting {sys.argv[0]}")
 
     # TODO: Make path more Windows standard / friendly
-    config_file_path = Path("~/{CONF_FILE_NAME}").expanduser()
+    config_file_path = Path(f"~/{CONF_FILE_NAME}").expanduser()
+    LOG.debug(f"Using {config_file_path} config")
 
     if args.init:
         return init_config(config_file_path)
@@ -143,16 +146,16 @@ def main() -> int:
         LOG.error(f"{config_file_path} has no tgsign section")
         return 1
 
-    public_key = _load_public_key(Path(str(config["public_key_file"])))
+    public_key = _load_public_key(Path(str(config["tgsign"]["public_key_file"])))
     if not public_key:
         LOG.error("No public key loaded. Exiting.")
         return 2
 
     public_cert = get_signed_cert(
-        str(config["api_id"]),
-        str(config["api_secret"]),
+        str(config["tgsign"]["api_id"]),
+        str(config["tgsign"]["api_secret"]),
         public_key,
-        str(config["username"]) if "username" in config else "",
+        str(config["tgsign"]["username"]) if "username" in config else "",
         args.url,
     )
     if not public_cert:

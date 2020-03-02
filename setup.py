@@ -11,7 +11,7 @@ ptr_params = {
     "entry_point_module": "tgsign",
     "test_suite": "tgsign_tests",
     "test_suite_timeout": 120,
-    "required_coverage": {"tgsign.py": 20},
+    "required_coverage": {"tgsign.py": 90},
     "run_black": True,
     "run_mypy": True,
     "run_flake8": True,
