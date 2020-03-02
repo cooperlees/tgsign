@@ -1,4 +1,5 @@
 # tgsign
+
 Sign SSH Keys for Terragraph Access
 
 ## What is `tgsign`
@@ -17,3 +18,13 @@ Small Python tool that can resign SSH Key pair for Terragraph access.
   - `/some/path/bin/tgsign`
 
 Now enjoy access to a Terragraph Development image.
+
+## Sample .tgsign.conf
+
+```ini
+[tgsign]
+api_id = foo
+api_secret = bar
+public_key_file = /home/cooper/.ssh/id_25519.pub
+username = cooper
+```
