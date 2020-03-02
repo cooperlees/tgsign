@@ -147,7 +147,9 @@ def main() -> int:
         LOG.error(f"{config_file_path} has no tgsign section")
         return 1
 
-    public_key = _load_public_key(Path(str(config["tgsign"]["public_key_file"])))
+    public_key = _load_public_key(
+        Path(str(config["tgsign"]["public_key_file"])).expanduser()
+    )
     if not public_key:
         LOG.error("No public key loaded. Exiting.")
         return 2
