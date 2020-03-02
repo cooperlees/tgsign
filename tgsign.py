@@ -8,6 +8,7 @@ import argparse
 import logging
 import sys
 from configparser import ConfigParser
+from json import dumps
 from pathlib import Path
 from typing import Optional
 
@@ -54,32 +55,39 @@ def _load_public_key(public_key_path: Path) -> str:
 
 def get_signed_cert(
     api_id: str,
-    api_secret: str,
+    api_token: str,
     public_key: str,
     username: str = "",
     sign_url: str = "https://sw.terragraph.link/sign",
 ) -> str:
     post_data = {
         "api_id": api_id,
-        "api_secret": api_secret,
+        "api_token": api_token,
         "public_key": public_key,
     }
     if username:
         post_data["username"] = username
-    r = httpx.post(sign_url, data=post_data)
-    resp_json = r.json()
-    if "error" in resp_json[0]:
+
+    with httpx.Client() as client:
+        r = client.post(sign_url, data=dumps(post_data))
+        resp_json = r.json()
+
+    if not isinstance(resp_json, dict):
+        LOG.error(f"Unexpected type of JSON returned: {resp_json}")
+        return ""
+
+    if "error" in resp_json:
         LOG.error(
-            f"Problem signing key for {api_id} / ({username}): {resp_json[0]['error']}"
+            f"Problem signing key for {api_id} / ({username}): {resp_json['error']}"
         )
         return ""
 
-    return resp_json[0]["public_cert"]
+    return resp_json["public_cert"]
 
 
 def init_config(config_path: Path) -> int:
     api_id = input("API ID: ")
-    api_secret = input("API Secret: ")
+    api_token = input("API Token: ")
     public_key_path = input("Public Key File path: ")
     username = input("Username (different to app_id? hit enter if not): ")
 
@@ -87,7 +95,7 @@ def init_config(config_path: Path) -> int:
     cp = ConfigParser()
     cp["tgsign"] = {}
     cp["tgsign"]["api_id"] = api_id
-    cp["tgsign"]["api_secret"] = api_secret
+    cp["tgsign"]["api_token"] = api_token
     cp["tgsign"]["public_key_file"] = str(public_key_path)
     if username:
         cp["tgsign"]["username"] = username
@@ -156,7 +164,7 @@ def main() -> int:
 
     public_cert = get_signed_cert(
         str(config["tgsign"]["api_id"]),
-        str(config["tgsign"]["api_secret"]),
+        str(config["tgsign"]["api_token"]),
         public_key,
         str(config["tgsign"]["username"]) if "username" in config else "",
         args.url,
